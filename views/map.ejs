@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Taiwan Fishing Map</title>
+  <script type="text/javascript" src="/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="/js/jquery.tinyMap-3.4.5.min.js"></script>
+<script type="text/javascript" src="/js/push.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script> window.ppSettings = {app_uuid:'496ec286-906d-11e6-b4b8-02287b8c0ebf'};(function(){var w=window,d=document;function l(){var a=d.createElement('script');a.type='text/javascript';a.async=!0;a.src='https://ppmessage.com/ppcom/assets/pp-library.min.js';var b=d.getElementsByTagName('script')[0];b.parentNode.insertBefore(a,b)}w.attachEvent?w.attachEvent('onload',l):w.addEventListener('load',l,!1);})()</script>
+
+<style>
+
+.map ,body ,html{
+    width: 100%;
+    height: 100%;
+	margin:0;
+}
+.labels {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    color: white;
+    padding: 4px
+}
+
+.panel{width:100px;background:rgba(255,255,255,0.0);z-index:100}
+
+#map {
+	margin: 0;
+	padding: 0;
+	height: 400px;
+	max-width: none;
+}
+#map img {
+	max-width: none !important;
+}
+.gm-style-iw {
+    width: 350px !important;
+    top: 15px !important;
+    left: 0px !important;
+    background-color: #fff;
+    box-shadow: 0 1px 6px rgba(178, 178, 178, 0.6);
+    border: 1px solid rgba(72, 181, 233, 0.6);
+    border-radius: 10px 10px 10px 10px;
+}
+#iw-container {
+    margin-bottom: 10px;
+}
+#iw-container .iw-title {
+    font-family: 'Open Sans Condensed', sans-serif;
+    font-size: 40px;
+    font-weight: 400;
+    padding: 10px;
+    background-color: #48b5e9;
+    color: white;
+    margin: 0;
+    border-radius: 2px 2px 0 0;
+}
+#iw-container .iw-content {
+    font-size: 30px;
+    line-height: 60px;
+    font-weight: 400;
+    margin-right: 1px;
+    padding: 15px 5px 20px 15px;
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+</style>
+<script>
+
+ var markers = [];
+<% for (var i=0; i <  docs.length ;i++)
+{ %>
+var content = '<div id="iw-container">' +
+                    '<div class="iw-title">' + '<%= docs[i].local.storename %>' + '</div>' +
+                    '<div class="iw-content">' +
+                    '<p class="btn btn-info btn-lg">電話</p>&nbsp&nbsp ' + '<%= docs[i].local.telephone %>' + '<br><p class="btn btn-info btn-lg">地址</p>&nbsp&nbsp' + '<%= docs[i].local.address %>' + //'</p>'+
+                    '</div>' +
+                    '<div class="iw-bottom-gradient"></div>' +
+                  '</div>';
+
+var iconType ;
+switch('<%= docs[i].local.storeclass %>')
+{
+	case '釣具行' :
+		iconType = {url:'/icons/store.png',scaledSize:[72,72]};
+		break;
+	case '釣魚池' :
+		iconType = {url:'/icons/fishing6.png',scaledSize:[72,72]};
+		break;
+	case '海釣場' :
+		iconType = {url:'/icons/fishing.png',scaledSize:[72,72]};
+		break;
+	case '釣蝦場' :
+		iconType = {url:'/icons/shrimp.png',scaledSize:[72,72]};
+		break;
+	default:
+		break;
+}
+ markers.push({
+        addr: '<%=  docs[i].local.lat + "," + docs[i].local.lng %>',
+		storeType: '<%= docs[i].local.storeclass %>',
+		text: content,
+        newLabel:'<%= docs[i].local.storename %>',
+		newLabelCSS: 'labels',
+        icon: iconType,
+		'infoWindowOptions': {
+                'event': {
+						'position_changed': function () {                        
+                    	//this.setContent(content);
+                        $('.map').tinyMap('panTo', '<%=  docs[i].local.lat + "," + docs[i].local.lng %>');
+						//$('.map').tinyMap('modify', {zoom: 16});  
+                    },
+				'domready': function(){
+  var iwOuter = $('.gm-style-iw');
+
+   
+    var iwBackground = iwOuter.prev();
+
+    // Removes background shadow DIV
+    iwBackground.children(':nth-child(2)').css({'display' : 'none'});
+
+    // Removes white background DIV
+    iwBackground.children(':nth-child(4)').css({'display' : 'none'});
+
+    // Moves the infowindow 115px to the right.
+    iwOuter.parent().parent().css({left: '115px'});
+
+    // Moves the shadow of the arrow 76px to the left margin.
+    iwBackground.children(':nth-child(1)').attr('style', function(i,s){ return s + 'left: 76px !important;'});
+
+    // Moves the arrow 76px to the left margin.
+    iwBackground.children(':nth-child(3)').attr('style', function(i,s){ return s + 'left: 76px !important;'});
+
+    // Changes the desired tail shadow color.
+    iwBackground.children(':nth-child(3)').find('div').children().css({'box-shadow': 'rgba(72, 181, 233, 0.6) 0px 1px 6px', 'z-index' : '1'});
+
+    // Reference to the div that groups the close button elements.
+    var iwCloseBtn = iwOuter.next();
+
+    // Apply the desired effect to the close button
+    iwCloseBtn.css({opacity: '1', right: '38px', top: '3px', 'border-radius': '13px', 'box-shadow': '0 0 5px #3990B9'});
+
+    // If the content of infowindow not exceed the set maximum height, then the gradient is removed.
+    if($('.iw-content').height() < 140){
+      $('.iw-bottom-gradient').css({display: 'none'});
+    }
+
+    // The API automatically applies 0.7 opacity to the button after the mouseout event. This function reverses this event to the desired value.
+    iwCloseBtn.mouseout(function(){
+      $(this).css({opacity: '1'});
+    });
+				}
+				
+				
+  
+                }
+            }
+    });
+							
+							
+<% } %>
+
+</script>
+</head>
+<body>
+ <div class='map'></div>
+ <div class="panel">   
+    <button type="button" class="btn btn-success btn-lg" id="button1">釣具行</button>
+	<button type="button" class="btn btn-warning btn-lg" id="button2">釣魚池</button>
+    <button type="button" class="btn btn-primary btn-lg" id="button3">海釣場</button>
+	<button type="button" class="btn btn-danger btn-lg" id="button4">釣蝦場</button>
+	<button type="button" class="btn btn-default btn-lg" id="button5">全部顯示</button>
+</div>
+</body>   
+ 
+<script>
+//Push.create('Hello World!')
+$.fn.tinyMapConfigure({   
+    'key': 'AIzaSyC4Ez7CLBjauLsVdWNwnKYzM0YoNzOD33g',
+	//'clusterer': '/js/markerclusterer.js',
+	//'withLabel': '/js/markerwithlabel.js'
+});
+  $('.map').tinyMap({
+    'center': ['25.034516521123315','121.56496524810791'],
+    'zoom'  : 12,
+	'marker': markers,
+	//'markerCluster': true,
+	'zoomControlOptions': {
+        'position': 'google.maps.ControlPosition.LEFT_BOTTOM'
+    	},
+    'streetViewControlOptions': {
+        'position': 'google.maps.ControlPosition.LEFT_BOTTOM'
+    	},
+	'event': {
+        'idle': {
+            'func': function () {
+                // 綁定 Control button click 事件
+                var control = $('.panel');
+				
+                control.find('#button1').on('click', function () {
+					
+                    var fishingstore=[];
+					for (var i=0; i <  markers.length  ;i++){
+					if(markers[i].storeType=="釣具行"){
+					markers[i].animation = 'BOUNCE';
+					fishingstore.push(markers[i]);}
+					}
+					var opt = {
+                            'marker': fishingstore
+                        };
+					
+                    $('.map').tinyMap('clear');
+					$('.map').tinyMap('modify', opt);
+				//推播
+				Push.create("歡迎來到釣魚地圖！", {
+					body: "地圖資料目前尚未完善，需要大家提供資訊！",
+					icon: '/icons/squid.png',
+					timeout: 4000,
+					onClick: function () {
+						window.focus();
+						this.close();
+					}
+				});
+                });
+				control.find('#button2').on('click', function () {
+					var fishing1area=[];
+					for (var i=0; i <  markers.length  ;i++){
+					if(markers[i].storeType=="釣魚池"){
+					markers[i].animation = 'BOUNCE';
+					fishing1area.push(markers[i]);}
+					}
+					var opt = {
+                            'marker': fishing1area
+                        };
+					
+                    $('.map').tinyMap('clear');
+					$('.map').tinyMap('modify', opt);
+				//推播
+				Push.create("如何提供店家資訊？", {
+					body: "請點擊右下方圖示，將資訊以對話傳送。",
+					icon: '/icons/shrimp3.png',
+					timeout: 4000,
+					onClick: function () {
+						window.focus();
+						this.close();
+					}
+				});
+                });
+				control.find('#button3').on('click', function () {
+					var fishingarea=[];
+					for (var i=0; i <  markers.length  ;i++){
+					if(markers[i].storeType=="海釣場"){
+					markers[i].animation = 'BOUNCE';
+					fishingarea.push(markers[i]);}
+					}
+					var opt = {
+                            'marker': fishingarea
+                        };
+					
+                    $('.map').tinyMap('clear');
+					$('.map').tinyMap('modify', opt);
+				//推播
+				Push.create("店家資訊有誤嗎？", {
+					body: "請點擊右下方圖示，將資訊傳送更新。",
+					icon: '/icons/lobster.png',
+					timeout: 4000,
+					onClick: function () {
+						window.focus();
+						this.close();
+					}
+				});
+                });
+				control.find('#button4').on('click', function () {
+					var shrimparea=[];
+					for (var i=0; i <  markers.length  ;i++){
+					if(markers[i].storeType=="釣蝦場"){
+					markers[i].animation = 'BOUNCE';
+					shrimparea.push(markers[i]);}
+					}
+					var opt = {
+                            'marker': shrimparea
+                        };
+					
+                    $('.map').tinyMap('clear');
+					$('.map').tinyMap('modify', opt);
+				//推播
+				Push.create("對本站有更好的想法嗎？", {
+					body: "請點擊右下方圖示，將意見提供給作者。",
+					icon: '/icons/turtle.png',
+					timeout: 4000,
+					onClick: function () {
+						window.focus();
+						this.close();
+					}
+				});
+                });
+				control.find('#button5').on('click', function () {
+				
+					var allarea=[];
+					for (var i=0; i <  markers.length  ;i++){
+					
+					markers[i].animation = 'BOUNCE';
+					allarea.push(markers[i]);}
+					
+					var opt = {
+                            'marker': allarea
+                        };
+					
+                    $('.map').tinyMap('clear');
+					$('.map').tinyMap('modify', opt);
+				//推播
+				Push.create("大家好，我是吳尼克。", {
+					body: "很高興能學以致用，為釣魚人盡一份力！",
+					icon: '/icons/author.jpg',
+					timeout: 4000,
+					onClick: function () {
+						window.focus();
+						this.close();
+					}
+				});
+                });
+                // 將 Control push 至 map controls
+                this.controls[google.maps.ControlPosition.LEFT_TOP].push(control.get(0));
+            },
+            'once': true
+        }
+    }
+});
+//推播
+				Push.create("歡迎來到釣魚地圖！", {
+					body: "地圖資料目前尚未完善，需要大家提供資訊！",
+					icon: '/icons/fishing3.png',
+					timeout: 4000,
+					onClick: function () {
+						window.focus();
+						this.close();
+					}
+				});
+    </script>
+
+
+</html>

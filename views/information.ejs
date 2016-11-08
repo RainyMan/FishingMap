@@ -1,0 +1,131 @@
+<!-- views/information.ejs -->
+<!doctype html>
+<html>
+<head>
+	<title>Information</title>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+	<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyC4Ez7CLBjauLsVdWNwnKYzM0YoNzOD33g&libraries=places"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript" src="https://cdn.essoduke.org/js/twzipcode/jquery.twzipcode-1.7.8.min.js"></script>
+	<script type="text/javascript" src="/js/jquery.geocomplete.js"></script>
+	
+	<style>
+		body 		{ padding-top:80px; }
+		.zipcode, .county, .district {
+										width: 9rem;
+										display: inline-block;
+										margin-right: 4px;}
+		.hide { display: hide}								
+	</style>
+	<style>
+	.map_canvas { 
+  width: 540px; 
+  height: 400px; 
+  margin: 10px 20px 10px 0;
+}
+</style>
+	
+</head>
+<body>
+<div class="container">
+
+<div class="col-sm-6 col-sm-offset-3">
+
+	<h1><span class="fa fa-sign-in"></span> Information</h1>
+
+	<!-- show any messages that come back with authentication -->
+	<% if (message.length > 0) { %>
+		<div class="alert alert-danger"><%= message %></div>
+	<% } %>
+
+	<!-- LOGIN FORM -->
+	<form action="/information" method="post">
+		<div class="form-group">
+			<label>Store Name</label>
+			<input type="text" class="form-control" name="storename" placeholder="Type in a store">
+		</div>
+		
+		<div class="form-group" >	
+			<label>Store Class</label>
+			<div class="row">
+			<div class="col-xs-4">
+			<select name="storeclass" class="form-control" >
+			<option value="釣具行">釣具行</option>
+			<option value="釣魚池">釣魚池</option>
+			<option value="海釣場">海釣場</option>
+			<option value="釣蝦場">釣蝦場</option>
+			</select>   
+			</div></div>
+		</div>
+		
+		<div class="form-group">
+			<label>Address</label>
+			
+			<!--div id="twzipcode"></div-->
+			<input id="geocomplete" type="text" placeholder="Type in an address" class="form-control" name="address" >		
+			<!--input id="find" type="button" value="find" /-->
+			
+			<div class="map_canvas"></div>
+			<label>Latitude</label>
+			
+			<input  name="lat" type="text" value="">
+			
+			<label>Longitude</label>
+			
+        <input  name="lng" type="text" value="">
+		</div>
+		
+		<div class="form-group">
+			<label>Telephone</label>
+			<input type="text" class="form-control" name="telephone" placeholder="Type in a telephone">
+		</div>
+
+		<button type="submit" class="btn btn-warning btn-lg">Send</button>
+	</form>
+
+	<hr>
+
+	<p>Already have an account? <a href="/login">Login</a></p>
+	<p>Or go <a href="/">home</a>.</p>
+
+</div>
+
+</div>
+
+</body>
+
+<script>
+      $(function(){
+        $("#geocomplete").geocomplete({
+          map: ".map_canvas",
+		  details: "form ",
+          mapOptions: {
+			scrollwheel: true
+			},
+          markerOptions: {
+            draggable: true,
+          }
+        });
+        
+        $("#geocomplete").bind("geocode:dragged", function(event, latLng){
+          $("input[name=lat]").val(latLng.lat());
+          $("input[name=lng]").val(latLng.lng());
+          $("#reset").show();
+        });
+       
+	   $("#find").click(function(){
+          $("#geocomplete").trigger("geocode");
+        }).click();
+      });
+	  
+ </script>
+
+<script>
+	$('#twzipcode').twzipcode({
+    
+    'css': ['county form-control', 'district form-control', 'hide']
+});
+</script>
+	
+</html>
