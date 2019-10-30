@@ -15,7 +15,7 @@
     "express": "~4.12.3",
     "express-session": "latest",
     "mongoose": "latest",
-    "morgan": "~1.5.2",
+    "morgan": "~1.9.1",
     "nodemon": "^1.11.0",
     "push.js": "0.0.11"
   }
